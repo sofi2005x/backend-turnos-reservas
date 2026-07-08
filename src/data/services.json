@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "name": "Corte de cabello",
+    "description": "Corte clásico",
+    "duration": 30,
+    "price": 5000,
+    "category": "peluqueria",
+    "available": true
+  },
+  {
+    "id": 2,
+    "name": "Manicura",
+    "description": "Manicura semipermanente",
+    "duration": 45,
+    "price": 8000,
+    "category": "estetica",
+    "available": true
+  },
+  {
+    "id": 3,
+    "name": "Masaje relajante",
+    "description": "Masaje de 1 hora",
+    "duration": 60,
+    "price": 12000,
+    "category": "bienestar",
+    "available": false
+  }
+]
