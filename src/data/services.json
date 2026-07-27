@@ -25,5 +25,14 @@
     "price": 12000,
     "category": "bienestar",
     "available": false
+  },
+  {
+    "id": 4,
+    "name": "Depilación",
+    "description": "Depilación con cera",
+    "duration": 20,
+    "price": 4000,
+    "category": "estetica",
+    "available": true
   }
 ]

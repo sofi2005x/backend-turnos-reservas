@@ -89,3 +89,27 @@ const uno = await manager.getServiceById(nuevo.id);
 const actualizado = await manager.updateService(nuevo.id, { price: 6000 });
 const eliminado = await manager.deleteService(nuevo.id);
 \`\`\`
+
+### Otros ejemplos
+
+**Filtrar por categoría y disponibilidad:**
+\`\`\`bash
+curl "http://localhost:8080/api/services?category=salud&available=true"
+\`\`\`
+
+**Actualizar un servicio (el id nunca cambia, aunque lo mandes en el body):**
+\`\`\`bash
+curl -X PUT http://localhost:8080/api/services/1 \
+  -H "Content-Type: application/json" \
+  -d '{"price": 15000}'
+\`\`\`
+
+**Eliminar un servicio:**
+\`\`\`bash
+curl -X DELETE http://localhost:8080/api/services/1
+\`\`\`
+
+### Manejo de errores
+
+- Crear un servicio sin todos los campos obligatorios devuelve `400` con un mensaje indicando qué falta.
+- Consultar, actualizar o eliminar un `id` que no existe devuelve `404`.

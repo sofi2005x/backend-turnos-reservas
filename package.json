@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node --watch src/app.js",
+    "dev": "node --watch src/server.js",
     "start": "node src/app.js"
   },
   "keywords": [
@@ -18,6 +18,7 @@
   ],
   "description": "Sistema backend de turnos y reservas con Node.js, Express y MongoDB",
   "dependencies": {
-    "dotenv": "^17.4.2"
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
   }
 }
