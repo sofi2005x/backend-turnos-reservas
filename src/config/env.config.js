@@ -18,7 +18,8 @@ if (missing.length > 0) {
   process.exit(1);
 }
 
-const config = {
+const 
+config = {
   port: Number(process.env.PORT), // Number() porque process.env siempre da string
   nodeEnv: process.env.NODE_ENV,
 };
