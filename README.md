@@ -1,45 +1,79 @@
-# Backend Turnos y Reservas — Administrador de Servicios
+# Sistema Backend de Turnos y Reservas
 
-Proyecto Node.js (ESM) que implementa una clase `ServiceManager` para gestionar
-los servicios ofrecidos por un sistema de turnos y reservas (peluquería,
-estética, bienestar, etc.), persistiendo los datos en un archivo JSON local.
+API REST construida con **Node.js** y **Express**, que gestiona dos recursos —
+**servicios** y **reservas** — persistiendo los datos en archivos JSON locales
+mediante el módulo nativo `fs/promises`.
+
+Este proyecto corresponde a la pre-entrega "API inicial de servicios y
+reservas con FileSystem" del curso de Backend Avanzado. Es la base sobre la
+que, en módulos posteriores, se van a incorporar arquitectura en capas,
+MongoDB, vistas y WebSockets.
+
+## Tecnologías utilizadas
+
+- Node.js (ESM — `"type": "module"`)
+- Express 5
+- dotenv (variables de entorno)
+- Persistencia con archivos JSON (`fs/promises`)
 
 ## Instalación
 
-\`\`\`bash
+```bash
 git clone https://github.com/sofi2005x/backend-turnos-reservas.git
 cd backend-turnos-reservas
 npm install
-\`\`\`
+```
 
 ## Variables de entorno
 
 Copiar `.env.example` a `.env` y completar:
 
-| Variable   | Descripción                          | Ejemplo       |
-|------------|---------------------------------------|---------------|
-| PORT       | Puerto reservado para etapas futuras  | 8080          |
-| NODE_ENV   | Entorno de ejecución                  | development   |
+| Variable | Descripción                           | Ejemplo     |
+| -------- | ------------------------------------- | ----------- |
+| PORT     | Puerto en el que escucha el servidor  | 8080        |
+| NODE_ENV | Entorno de ejecución                  | development |
 
-Si falta alguna variable obligatoria, la app no arranca y muestra un error
-explícito en consola (fail-fast, validado en `src/config/env.config.js`).
+Si falta alguna variable obligatoria, la app **no arranca** y muestra un
+error explícito en consola (fail-fast, validado en `src/config/env.config.js`).
 
 ## Ejecución
 
-\`\`\`bash
-node src/app.js
-\`\`\`
+```bash
+npm start   # levanta el servidor una sola vez
+npm run dev # levanta el servidor con reinicio automático (node --watch)
+```
 
-Esto corre una prueba manual que crea, busca, actualiza y elimina servicios
-usando `ServiceManager`, mostrando el resultado de cada operación por consola.
-Todavía no hay servidor HTTP levantado: esta etapa se centra en la lógica de
-negocio pura, sin capa de red (eso se agrega en un módulo posterior del curso).
+Si todo carga bien, vas a ver en la consola:
+
+```
+🚀 Servidor escuchando en http://localhost:8080
+```
+
+## Estructura del proyecto
+
+```
+src/
+  app.js                      # configura Express, middlewares y rutas
+  server.js                   # levanta el servidor (app.listen)
+  config/
+    env.config.js             # valida y centraliza las variables de entorno
+  managers/
+    ServiceManager.js         # CRUD de servicios sobre services.json
+    BookingManager.js         # CRUD de reservas sobre bookings.json
+    index.js                  # crea y exporta las instancias únicas de los managers
+  routes/
+    services.router.js        # endpoints de /api/services
+    bookings.router.js        # endpoints de /api/bookings
+  data/
+    services.json             # persistencia de servicios
+    bookings.json             # persistencia de reservas
+```
 
 ## Recurso: `services`
 
 Cada servicio tiene la forma:
 
-\`\`\`json
+```json
 {
   "id": 1,
   "name": "Corte de cabello",
@@ -49,67 +83,143 @@ Cada servicio tiene la forma:
   "category": "peluqueria",
   "available": true
 }
-\`\`\`
+```
 
-- `id`: generado automáticamente, nunca se recibe desde afuera.
+- `id`: se genera automáticamente, nunca se recibe desde el body.
 - `duration`: minutos que dura el servicio.
 - `price`: precio en la moneda local.
-- `category`: rubro del servicio (ej. peluqueria, estetica, bienestar).
-- `available`: si el servicio está actualmente ofrecido (`false` es un valor
-  válido, no significa "campo vacío").
+- `category`: rubro del servicio (ej. `peluqueria`, `estetica`, `bienestar`).
+- `available`: si el servicio está disponible (`false` es un valor válido,
+  no significa "campo vacío").
 
-## Métodos de `ServiceManager`
+### Endpoints
 
-| Método                          | Descripción                                      | Retorno si no existe |
-|----------------------------------|---------------------------------------------------|-----------------------|
-| `getServices()`                  | Devuelve todos los servicios                      | —                     |
-| `getServiceById(id)`             | Busca un servicio puntual                         | `null`                |
-| `addService(data)`               | Crea un servicio, valida campos obligatorios       | lanza error si faltan datos |
-| `updateService(id, data)`        | Actualiza un servicio; ignora cualquier `id` recibido en `data` | `null` |
-| `deleteService(id)`              | Elimina un servicio                               | `null`                |
+| Método | Ruta                 | Descripción                                                                               |
+| ------ | -------------------- | ------------------------------------------------------------------------------------------ |
+| GET    | `/api/services`      | Lista todos los servicios. Acepta filtros por query params: `?category=` y `?available=` |
+| GET    | `/api/services/:sid` | Devuelve un servicio por id                                                               |
+| POST   | `/api/services`      | Crea un servicio (valida todos los campos)                                               |
+| PUT    | `/api/services/:sid` | Actualiza un servicio (ignora cualquier `id` recibido en el body)                          |
+| DELETE | `/api/services/:sid` | Elimina un servicio                                                                       |
 
-### Ejemplos de uso
+### Ejemplos
 
-\`\`\`javascript
-import ServiceManager from './src/managers/ServiceManager.js';
+**Listar servicios disponibles de una categoría:**
 
-const manager = new ServiceManager('./src/data/services.json');
+```bash
+curl "http://localhost:8080/api/services?category=estetica&available=true"
+```
 
-const nuevo = await manager.addService({
-  name: 'Corte de cabello',
-  description: 'Corte clásico',
-  duration: 30,
-  price: 5000,
-  category: 'peluqueria',
-  available: true,
-});
+**Crear un servicio:**
 
-const todos = await manager.getServices();
-const uno = await manager.getServiceById(nuevo.id);
-const actualizado = await manager.updateService(nuevo.id, { price: 6000 });
-const eliminado = await manager.deleteService(nuevo.id);
-\`\`\`
+```bash
+curl -X POST http://localhost:8080/api/services \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Tinte",
+    "description": "Coloración completa",
+    "duration": 90,
+    "price": 15000,
+    "category": "peluqueria",
+    "available": true
+  }'
+```
 
-### Otros ejemplos
+**Actualizar un servicio (el id nunca cambia, aunque se mande en el body):**
 
-**Filtrar por categoría y disponibilidad:**
-\`\`\`bash
-curl "http://localhost:8080/api/services?category=salud&available=true"
-\`\`\`
-
-**Actualizar un servicio (el id nunca cambia, aunque lo mandes en el body):**
-\`\`\`bash
+```bash
 curl -X PUT http://localhost:8080/api/services/1 \
   -H "Content-Type: application/json" \
-  -d '{"price": 15000}'
-\`\`\`
+  -d '{"price": 6000}'
+```
 
 **Eliminar un servicio:**
-\`\`\`bash
+
+```bash
 curl -X DELETE http://localhost:8080/api/services/1
-\`\`\`
+```
 
-### Manejo de errores
+## Recurso: `bookings`
 
-- Crear un servicio sin todos los campos obligatorios devuelve `400` con un mensaje indicando qué falta.
-- Consultar, actualizar o eliminar un `id` que no existe devuelve `404`.
+Cada reserva tiene la forma:
+
+```json
+{
+  "id": 1,
+  "clientName": "Ana Perez",
+  "clientEmail": "ana@test.com",
+  "date": "2025-08-01",
+  "time": "10:00",
+  "status": "pending",
+  "services": [
+    { "service": 2, "quantity": 1 }
+  ]
+}
+```
+
+- `id`: se genera automáticamente.
+- `status`: si no se envía, toma el valor por defecto `"pending"`.
+- `services`: array de referencias a servicios existentes. Cada entrada
+  guarda solo el `id` del servicio (`service`) y una `quantity`. Si se
+  agrega el mismo servicio más de una vez, **se incrementa `quantity`** en
+  lugar de duplicar la entrada.
+
+### Endpoints
+
+| Método | Ruta                                | Descripción                                                              |
+| ------ | ------------------------------------ | ------------------------------------------------------------------------- |
+| POST   | `/api/bookings`                     | Crea una reserva (puede iniciarse con `services` vacío)                 |
+| GET    | `/api/bookings/:bid`                | Devuelve una reserva por id                                              |
+| POST   | `/api/bookings/:bid/services/:sid`  | Agrega un servicio a una reserva existente, validando que ambos existan |
+
+### Ejemplos
+
+**Crear una reserva:**
+
+```bash
+curl -X POST http://localhost:8080/api/bookings \
+  -H "Content-Type: application/json" \
+  -d '{
+    "clientName": "Ana Perez",
+    "clientEmail": "ana@test.com",
+    "date": "2025-08-01",
+    "time": "10:00"
+  }'
+```
+
+**Consultar una reserva:**
+
+```bash
+curl http://localhost:8080/api/bookings/1
+```
+
+**Agregar un servicio a una reserva existente:**
+
+```bash
+curl -X POST http://localhost:8080/api/bookings/1/services/2
+```
+
+Si se vuelve a ejecutar la misma request, la reserva no duplica el
+servicio: incrementa `quantity` en 1.
+
+## Manejo de errores
+
+| Situación                                                     | Código |
+| --------------------------------------------------------------- | ------ |
+| Crear un servicio o reserva sin los campos obligatorios         | `400`  |
+| Consultar/actualizar/eliminar un `id` de servicio inexistente    | `404`  |
+| Consultar una reserva inexistente                                | `404`  |
+| Agregar un servicio inexistente a una reserva                    | `404`  |
+| Agregar un servicio a una reserva inexistente                    | `404`  |
+
+Todas las respuestas siguen el mismo formato:
+
+```json
+{ "status": "success", "payload": { } }
+```
+
+o
+
+```json
+{ "status": "error", "message": "..." }
+```
