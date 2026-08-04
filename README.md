@@ -28,7 +28,7 @@ npm install
 
 Copiar `.env.example` a `.env` y completar:
 
-| Variable | Descripción                           | Ejemplo     |
+| Variable | Descripción                          | Ejemplo     |
 | -------- | ------------------------------------- | ----------- |
 | PORT     | Puerto en el que escucha el servidor  | 8080        |
 | NODE_ENV | Entorno de ejecución                  | development |
@@ -53,21 +53,52 @@ Si todo carga bien, vas a ver en la consola:
 
 ```
 src/
-  app.js                      # configura Express, middlewares y rutas
-  server.js                   # levanta el servidor (app.listen)
+  app.js                       # configura Express, middlewares y rutas
+  server.js                    # levanta el servidor (app.listen)
   config/
-    env.config.js             # valida y centraliza las variables de entorno
+    env.config.js              # valida y centraliza las variables de entorno
+  controllers/
+    services.controller.js     # lógica de request/response de servicios
+    bookings.controller.js     # lógica de request/response de reservas
   managers/
-    ServiceManager.js         # CRUD de servicios sobre services.json
-    BookingManager.js         # CRUD de reservas sobre bookings.json
-    index.js                  # crea y exporta las instancias únicas de los managers
+    ServiceManager.js          # CRUD de servicios sobre services.json
+    BookingManager.js          # CRUD de reservas sobre bookings.json
+    index.js                   # crea y exporta las instancias únicas de los managers
   routes/
-    services.router.js        # endpoints de /api/services
-    bookings.router.js        # endpoints de /api/bookings
+    services.router.js         # define endpoints de /api/services
+    bookings.router.js         # define endpoints de /api/bookings
   data/
-    services.json             # persistencia de servicios
-    bookings.json             # persistencia de reservas
+    services.json              # persistencia de servicios
+    bookings.json              # persistencia de reservas
 ```
+
+## Arquitectura: routers, controllers y managers
+
+El proyecto separa responsabilidades en tres capas, para que cada parte
+tenga una única razón de cambiar:
+
+```
+Cliente → Router → Controller → Manager → Archivo JSON
+```
+
+| Capa           | Responsabilidad                                                                 | Qué NO hace                                  |
+| -------------- | --------------------------------------------------------------------------------- | ---------------------------------------------- |
+| **Router**     | Define la URL y el método HTTP, y los conecta con una función del controller     | No lee `req`, no llama al manager, no responde |
+| **Controller** | Lee `req.params` / `req.query` / `req.body`, llama al manager y responde con `res.status().json()` | No accede directamente a los archivos JSON     |
+| **Manager**    | Contiene toda la lógica de datos: leer, validar, crear, actualizar, eliminar      | No conoce `req` ni `res`                       |
+
+**Ejemplo — `GET /api/services/:sid`:**
+
+1. `services.router.js` recibe la petición y la deriva a `getServiceById`.
+2. `services.controller.js` lee `req.params.sid`, se lo pasa a
+   `serviceManager.getServiceById(sid)`, y arma la respuesta HTTP
+   (`200` si existe, `404` si no).
+3. `ServiceManager.js` busca el servicio dentro de `services.json` y lo
+   devuelve (o `null`).
+
+Esta separación es la que permite, en etapas futuras del curso, cambiar
+la persistencia de FileSystem a MongoDB modificando **únicamente** la
+capa de managers, sin tocar controllers ni routers.
 
 ## Recurso: `services`
 
@@ -205,8 +236,8 @@ servicio: incrementa `quantity` en 1.
 ## Manejo de errores
 
 | Situación                                                     | Código |
-| --------------------------------------------------------------- | ------ |
-| Crear un servicio o reserva sin los campos obligatorios         | `400`  |
+| ---------------------------------------------------------------  | ------ |
+| Crear un servicio o reserva sin los campos obligatorios          | `400`  |
 | Consultar/actualizar/eliminar un `id` de servicio inexistente    | `404`  |
 | Consultar una reserva inexistente                                | `404`  |
 | Agregar un servicio inexistente a una reserva                    | `404`  |
