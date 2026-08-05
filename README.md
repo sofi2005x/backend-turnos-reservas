@@ -28,7 +28,7 @@ npm install
 
 Copiar `.env.example` a `.env` y completar:
 
-| Variable | Descripción                          | Ejemplo     |
+| Variable | Descripción                           | Ejemplo      |
 | -------- | ------------------------------------- | ----------- |
 | PORT     | Puerto en el que escucha el servidor  | 8080        |
 | NODE_ENV | Entorno de ejecución                  | development |
@@ -60,49 +60,72 @@ src/
   controllers/
     services.controller.js     # lógica de request/response de servicios
     bookings.controller.js     # lógica de request/response de reservas
-  managers/
-    ServiceManager.js          # CRUD de servicios sobre services.json
-    BookingManager.js          # CRUD de reservas sobre bookings.json
-    index.js                   # crea y exporta las instancias únicas de los managers
+  services/
+    services.service.js        # reglas de negocio de servicios
+    bookings.service.js        # reglas de negocio de reservas
+  repositories/
+    services.repository.js     # intermediario entre service y DAO
+    bookings.repository.js     # intermediario entre service y DAO
+  dao/
+    services.dao.js            # lee/escribe directamente services.json
+    bookings.dao.js            # lee/escribe directamente bookings.json
   routes/
     services.router.js         # define endpoints de /api/services
     bookings.router.js         # define endpoints de /api/bookings
   data/
-    services.json              # persistencia de servicios
-    bookings.json              # persistencia de reservas
+    services.json               # persistencia de servicios
+    bookings.json               # persistencia de reservas
 ```
 
-## Arquitectura: routers, controllers y managers
+## Arquitectura en capas
 
-El proyecto separa responsabilidades en tres capas, para que cada parte
-tenga una única razón de cambiar:
+El proyecto separa responsabilidades en cinco capas, para que cada parte
+tenga una única razón de cambiar y para poder migrar la persistencia en
+el futuro (de FileSystem a MongoDB) modificando lo menos posible:
 
 ```
-Cliente → Router → Controller → Manager → Archivo JSON
+Cliente → Router → Controller → Service → Repository → DAO → Archivo JSON
 ```
 
-| Capa           | Responsabilidad                                                                 | Qué NO hace                                  |
-| -------------- | --------------------------------------------------------------------------------- | ---------------------------------------------- |
-| **Router**     | Define la URL y el método HTTP, y los conecta con una función del controller     | No lee `req`, no llama al manager, no responde |
-| **Controller** | Lee `req.params` / `req.query` / `req.body`, llama al manager y responde con `res.status().json()` | No accede directamente a los archivos JSON     |
-| **Manager**    | Contiene toda la lógica de datos: leer, validar, crear, actualizar, eliminar      | No conoce `req` ni `res`                       |
+| Capa           | Responsabilidad                                                                       | Qué NO hace                                                        |
+| -------------- | ----------------------------------------------------------------------------------------- | -----------------------------------------------------          |
+| **Router**     | Define la URL y el método HTTP, y los conecta con una función del controller             | No lee `req`, no llama a otras capas, no responde               |
+| **Controller** | Lee `req.params` / `req.query` / `req.body`, llama al service y responde con `res.status().json()` | No conoce reglas de negocio ni accede a archivos JSON |
+| **Service**    | Contiene las reglas de negocio (validaciones, qué está permitido hacer)                   | No conoce `req` ni `res`, no lee/escribe archivos              |
+| **Repository** | Intermediario entre el service y el DAO; expone métodos de acceso a datos sin lógica      | No contiene reglas de negocio                                  |  
+| **DAO**        | Lee y escribe directamente el archivo JSON correspondiente                                | No contiene reglas de negocio                                  |
 
-**Ejemplo — `GET /api/services/:sid`:**
+**Ejemplo — `POST /api/services` (crear un servicio):**
 
-1. `services.router.js` recibe la petición y la deriva a `getServiceById`.
-2. `services.controller.js` lee `req.params.sid`, se lo pasa a
-   `serviceManager.getServiceById(sid)`, y arma la respuesta HTTP
-   (`200` si existe, `404` si no).
-3. `ServiceManager.js` busca el servicio dentro de `services.json` y lo
-   devuelve (o `null`).
+1. `services.router.js` recibe la petición y la deriva a `createService`.
+2. `services.controller.js` lee `req.body` y se lo pasa a
+   `servicesService.createService(data)`.
+3. `services.service.js` valida que estén todos los campos obligatorios
+   (`name`, `description`, `duration`, `price`, `category`, `available`).
+   Si falta alguno, corta ahí mismo con un error (`400`).
+4. Si los datos son válidos, delega en `servicesRepository.create(data)`.
+5. `services.repository.js` reenvía la llamada a `services.dao.js`.
+6. `services.dao.js` lee `services.json`, genera el nuevo `id`
+   (`Math.max` + 1), agrega el servicio y reescribe el archivo.
+7. El resultado vuelve capa por capa hasta el controller, que responde
+   `201` con el servicio creado.
 
-Esta separación es la que permite, en etapas futuras del curso, cambiar
-la persistencia de FileSystem a MongoDB modificando **únicamente** la
-capa de managers, sin tocar controllers ni routers.
+**Regla de negocio destacada — `bookings`:** si al agregar un servicio a
+una reserva (`POST /api/bookings/:bid/services/:sid`) ese servicio ya
+estaba presente, `bookings.service.js` incrementa su `quantity` en vez
+de duplicar la entrada. Esta decisión vive en el **service**, no en el
+DAO, porque es una regla de negocio y no un detalle técnico de
+persistencia.
+
+Gracias a esta separación, el día que se migre de archivos JSON a
+MongoDB (próxima etapa del curso), el cambio queda contenido
+**únicamente en la capa DAO** — controllers, services, repositories y
+routers permanecen exactamente iguales.
 
 ## Recurso: `services`
 
 Cada servicio tiene la forma:
+
 
 ```json
 {
@@ -125,13 +148,13 @@ Cada servicio tiene la forma:
 
 ### Endpoints
 
-| Método | Ruta                 | Descripción                                                                               |
+| Método | Ruta                 | Descripción                                                                                |
 | ------ | -------------------- | ------------------------------------------------------------------------------------------ |
-| GET    | `/api/services`      | Lista todos los servicios. Acepta filtros por query params: `?category=` y `?available=` |
-| GET    | `/api/services/:sid` | Devuelve un servicio por id                                                               |
-| POST   | `/api/services`      | Crea un servicio (valida todos los campos)                                               |
+| GET    | `/api/services`      | Lista todos los servicios. Acepta filtros por query params: `?category=` y `?available=`   |
+| GET    | `/api/services/:sid` | Devuelve un servicio por id                                                                |
+| POST   | `/api/services`      | Crea un servicio (valida todos los campos)                                                 |
 | PUT    | `/api/services/:sid` | Actualiza un servicio (ignora cualquier `id` recibido en el body)                          |
-| DELETE | `/api/services/:sid` | Elimina un servicio                                                                       |
+| DELETE | `/api/services/:sid` | Elimina un servicio                                                                        |
 
 ### Ejemplos
 
@@ -197,11 +220,11 @@ Cada reserva tiene la forma:
 
 ### Endpoints
 
-| Método | Ruta                                | Descripción                                                              |
-| ------ | ------------------------------------ | ------------------------------------------------------------------------- |
-| POST   | `/api/bookings`                     | Crea una reserva (puede iniciarse con `services` vacío)                 |
-| GET    | `/api/bookings/:bid`                | Devuelve una reserva por id                                              |
-| POST   | `/api/bookings/:bid/services/:sid`  | Agrega un servicio a una reserva existente, validando que ambos existan |
+| Método | Ruta                                | Descripción                                                               |
+| ------ | ------------------------------------| ------------------------------------------------------------------------- |
+| POST   | `/api/bookings`                     | Crea una reserva (puede iniciarse con `services` vacío)                   |
+| GET    | `/api/bookings/:bid`                | Devuelve una reserva por id                                               |
+| POST   | `/api/bookings/:bid/services/:sid`  | Agrega un servicio a una reserva existente, validando que ambos existan   |
 
 ### Ejemplos
 
@@ -236,7 +259,7 @@ servicio: incrementa `quantity` en 1.
 ## Manejo de errores
 
 | Situación                                                     | Código |
-| ---------------------------------------------------------------  | ------ |
+| --------------------------------------------------------------- | ------ |
 | Crear un servicio o reserva sin los campos obligatorios          | `400`  |
 | Consultar/actualizar/eliminar un `id` de servicio inexistente    | `404`  |
 | Consultar una reserva inexistente                                | `404`  |

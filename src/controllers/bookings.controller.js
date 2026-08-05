@@ -1,12 +1,12 @@
-import { bookingManager } from '../managers/index.js';
+import { bookingsService } from '../services/bookings.service.js';
 
 // POST /api/bookings -> crea una reserva (puede iniciarse con services vacío)
 export const createBooking = async (req, res) => {
   try {
-    const newBooking = await bookingManager.createBooking(req.body);
+    const newBooking = await bookingsService.createBooking(req.body);
     res.status(201).json({ status: 'success', payload: newBooking });
   } catch (error) {
-    // el manager tira Error() si faltan clientName, clientEmail, date o time
+    // el service tira Error() si faltan clientName, clientEmail, date o time
     res.status(400).json({ status: 'error', message: error.message });
   }
 };
@@ -15,7 +15,7 @@ export const createBooking = async (req, res) => {
 export const getBookingById = async (req, res) => {
   try {
     const { bid } = req.params;
-    const booking = await bookingManager.getBookingById(bid);
+    const booking = await bookingsService.getBookingById(bid);
 
     if (!booking) {
       return res.status(404).json({ status: 'error', message: `No se encontró una reserva con id ${bid}` });
@@ -32,7 +32,7 @@ export const getBookingById = async (req, res) => {
 export const addServiceToBooking = async (req, res) => {
   try {
     const { bid, sid } = req.params;
-    const updatedBooking = await bookingManager.addServiceToBooking(bid, sid);
+    const updatedBooking = await bookingsService.addServiceToBooking(bid, sid);
 
     if (!updatedBooking) {
       return res.status(404).json({ status: 'error', message: `No se encontró una reserva con id ${bid}` });
@@ -40,7 +40,7 @@ export const addServiceToBooking = async (req, res) => {
 
     res.status(200).json({ status: 'success', payload: updatedBooking });
   } catch (error) {
-    // el manager tira Error() si el servicio (sid) no existe en services.json
+    // el service tira Error() si el servicio (sid) no existe en services.json
     res.status(404).json({ status: 'error', message: error.message });
   }
 };
