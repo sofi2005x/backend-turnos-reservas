@@ -1,8 +1,16 @@
-//este archivo se encarga de levantar el servidor, importamos la app y la configuracion del puerto, y luego llamamos al metodo listen para que el servidor empiece a escuchar en el puerto especificado.
-import app from './app.js';
-import config from './config/env.config.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
-app.listen(config.port, () => {
-  console.log(`🚀 Servidor escuchando en http://localhost:${config.port}`);
-});
+import { app } from './app.js';
+import { connectDB } from './config/db.js';
 
+const PORT = process.env.PORT || 8080;
+
+const startServer = async () => {
+  await connectDB();
+  app.listen(PORT, () => {
+    console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
+  });
+};
+
+startServer();

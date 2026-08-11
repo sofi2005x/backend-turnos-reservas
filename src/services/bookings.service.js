@@ -37,16 +37,22 @@ export const bookingsService = {
       throw new Error(`No existe un servicio con id ${serviceId}`);
     }
 
-    const numericServiceId = Number(serviceId);
-    const existingService = booking.services.find((item) => item.service === numericServiceId);
+    // CAMBIO 1: No convertir a número, trabajar con ObjectId
+    // const numericServiceId = Number(serviceId);  // BORRAR ESTA LÍNEA
+
+    // CAMBIO 2: Comparar ObjectIds correctamente
+    const existingService = booking.services.find((item) => 
+      item.service.toString() === serviceId
+    );
 
     // regla de negocio: si el servicio ya estaba, se incrementa quantity en vez de duplicar
     if (existingService) {
-      existingService.quantity += 1; // Incrementa la cantidad si ya existe
+      existingService.quantity += 1;
     } else {
-      booking.services.push({ service: numericServiceId, quantity: 1 });
+      booking.services.push({ service: serviceId, quantity: 1 });
     }
 
-    return await bookingsRepository.update(booking.id, { services: booking.services });
+    // CAMBIO 3: Con Mongoose es _id, no id
+    return await bookingsRepository.update(booking._id, { services: booking.services });
   },
 };

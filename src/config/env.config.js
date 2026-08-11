@@ -22,6 +22,7 @@ const
 config = {
   port: Number(process.env.PORT), // Number() porque process.env siempre da string
   nodeEnv: process.env.NODE_ENV,
+  mongoUri: process.env.MONGO_URI
 };
 
 export default config; // Cualquier otro archivo importa este objeto ya validado

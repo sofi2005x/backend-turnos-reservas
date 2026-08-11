@@ -85,3 +85,11 @@ export const deleteService = async (req, res) => {
     res.status(500).json({ status: 'error', message: 'Error al eliminar el servicio' });
   }
 };
+
+export const servicesController = {
+  getServices,
+  getServiceById,
+  createService,
+  updateService,
+  deleteService,
+};

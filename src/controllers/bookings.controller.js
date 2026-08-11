@@ -44,3 +44,11 @@ export const addServiceToBooking = async (req, res) => {
     res.status(404).json({ status: 'error', message: error.message });
   }
 };
+
+
+//exportamnos el objeto controller con todas las funciones para poder importarlas en el router
+export const bookingsController = {
+  createBooking,
+  getBookingById,
+  addServiceToBooking,
+};

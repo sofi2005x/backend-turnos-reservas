@@ -3,7 +3,7 @@ import {
   createBooking,
   getBookingById,
   addServiceToBooking,
-} from '../controllers/bookings.controller.js';
+} from '../dependencies/index.js';
 
 const router = Router();
 
