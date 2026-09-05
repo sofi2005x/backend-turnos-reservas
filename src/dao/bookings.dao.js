@@ -1,6 +1,9 @@
-import { BookingModel } from './models/booking.model.js';
-
+import { BookingModel } from '../models/booking.model.js';
 export const bookingsDao = {
+  async getAll() {
+    return await BookingModel.find().populate('services.service');
+  },
+
   async create(bookingData) {
     return await BookingModel.create(bookingData);
   },

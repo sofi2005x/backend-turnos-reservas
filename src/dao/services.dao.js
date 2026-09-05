@@ -1,5 +1,4 @@
-import { ServiceModel } from './models/service.model.js';
-
+import { ServiceModel } from '../models/service.model.js';
 export const servicesDao = {
   async getAll() {
     return await ServiceModel.find();

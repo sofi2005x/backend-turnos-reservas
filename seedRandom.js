@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import { ServiceModel } from './src/dao/models/service.model.js';
-import { BookingModel } from './src/dao/models/booking.model.js';
-import { MessageModel } from './src/dao/models/message.model.js';
+import { ServiceModel } from './src/models/service.model.js';
+import { BookingModel } from './src/models/booking.model.js';
+import { MessageModel } from './src/models/message.model.js';
 dotenv.config();
 
 const seedDatabase = async () => {

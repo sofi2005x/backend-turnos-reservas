@@ -1,10 +1,9 @@
 // seedRandom.js
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import { ServiceModel } from './src/dao/models/services.dao.js';
-import { BookingModel } from './src/dao/models/bookings.dao.js';
-import { MessageModel } from './src/dao/models/messages.dao.js';
-
+import { ServiceModel } from './src/models/service.model.js';
+import { BookingModel } from './src/models/booking.model.js';
+import { MessageModel } from './src/models/message.model.js';
 dotenv.config();
 
 // Nombres aleatorios

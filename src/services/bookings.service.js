@@ -2,6 +2,10 @@ import { bookingsRepository } from '../repositories/bookings.repository.js';
 import { servicesRepository } from '../repositories/services.repository.js';
 
 export const bookingsService = {
+  async getBookings() {
+    return await bookingsRepository.getAll();
+  },
+
   async createBooking(data) {
     const { clientName, clientEmail, date, time, status, services } = data;
 

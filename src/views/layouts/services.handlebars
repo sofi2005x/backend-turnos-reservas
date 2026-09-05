@@ -1,0 +1,18 @@
+<h1>Servicios disponibles</h1>
+
+<div id="services-list">
+  {{#if services.length}}
+    {{#each services}}
+      <div class="card {{#unless this.available}}unavailable{{/unless}}">
+        <h2>{{this.name}}</h2>
+        <p>{{this.description}}</p>
+        <p>Duración: {{this.duration}} minutos</p>
+        <p>Precio: ${{this.price}}</p>
+        <p>Categoría: {{this.category}}</p>
+        <p>Disponible: {{#if this.available}}Sí{{else}}No{{/if}}</p>
+      </div>
+    {{/each}}
+  {{else}}
+    <p>No hay servicios cargados.</p>
+  {{/if}}
+</div>

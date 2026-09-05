@@ -1,6 +1,9 @@
 import { bookingsDao } from '../dao/bookings.dao.js';
 
 export const bookingsRepository = {
+  async getAll() {
+    return await bookingsDao.getAll();
+  },
   async create(data) {
     return await bookingsDao.create(data);
   },
