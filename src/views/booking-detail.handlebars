@@ -1,0 +1,20 @@
+<h1>Detalle de la reserva</h1>
+
+{{#if booking}}
+  <div class="card">
+    <h2>{{booking.clientName}}</h2>
+    <p>Email: {{booking.clientEmail}}</p>
+    <p>Fecha: {{booking.date}} — Hora: {{booking.time}}</p>
+    <p>Estado: {{booking.status}}</p>
+    <p>Servicios:</p>
+    <ul>
+      {{#each booking.services}}
+        <li>{{this.service.name}} (x{{this.quantity}})</li>
+      {{else}}
+        <li>Sin servicios agregados</li>
+      {{/each}}
+    </ul>
+  </div>
+{{else}}
+  <p>No se encontró la reserva.</p>
+{{/if}}

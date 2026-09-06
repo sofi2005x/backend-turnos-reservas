@@ -17,7 +17,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '..', 'public'))); //Esto es lo que hace que el style.css y socket.js respondan cuando el navegador les pide, ya que los archivos estaticos estan en la carpeta public, y express.static sirve para decirle a express que esa carpeta es de archivos estaticos, y que los sirva cuando el navegador los pida. Esto es necesario para que el style.css y socket.js funcionen correctamente, ya que si no se hace esto, el navegador no puede acceder a esos archivos y no se aplican los estilos ni se ejecuta el script de socket.js.
 
 // Configuración de Handlebars como motor de vistas
-app.engine('handlebars', engine());
+app.engine('handlebars', engine({
+  defaultLayout: 'main',
+  layoutsDir: path.join(__dirname, 'views', 'layouts'),
+}));
 app.set('view engine', 'handlebars');
 app.set('views', path.join(__dirname, 'views'));
 

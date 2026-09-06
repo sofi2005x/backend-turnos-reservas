@@ -4,7 +4,7 @@ import { renderServices, renderBookings, renderBookingDetail } from '../controll
 const router = Router();
 
 router.get('/services', renderServices);
-router.get('/bookings', renderBookings);
-router.get('/bookings/:bid', renderBookingDetail);
+router.get('/bookings', renderBookings); // -> bookings.handlebars (lista)
+router.get('/bookings/:bid', renderBookingDetail); // -> booking-detail.handlebars (una sola)
 
 export default router;
