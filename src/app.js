@@ -19,8 +19,7 @@ app.use(express.static(path.join(__dirname, '..', 'public'))); //Esto es lo que 
 // Configuración de Handlebars como motor de vistas
 app.engine('handlebars', engine());
 app.set('view engine', 'handlebars');
-app.set('views', './src/views');
-
+app.set('views', path.join(__dirname, 'views'));
 
 // Rutas
 app.use('/api/services', servicesRouter);//agregamos el router de servicios a la app, para que pueda manejar las rutas de servicios

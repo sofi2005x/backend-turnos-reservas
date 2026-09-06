@@ -7,6 +7,7 @@ export const renderServices = async (req, res) => {
     const services = await servicesService.getServices();
     res.render('services', { services });
   } catch (error) {
+    console.error("Error al renderizar servicios:", error);
     res.status(500).send('Error al cargar los servicios');
   }
 };

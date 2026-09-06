@@ -1,4 +1,4 @@
-import { Router } from 'express'; //importamos Router de express para definir rutas
+import { Router } from 'express';
 import {
   getServices,
   getServiceById,
@@ -6,14 +6,15 @@ import {
   updateService,
   deleteService,
 } from '../dependencies/index.js';
+import { validateBody } from '../middlewares/validate.middleware.js';
+import { createServiceSchema, updateServiceSchema } from '../validations/service.validation.js';
 
 const router = Router();
 
-// El router solo define endpoints y los conecta con su función del controller
 router.get('/', getServices);
-router.get('/:sid', getServiceById); //son los endpoints que se definen en el router, y se conectan con las funciones del controller. El router no tiene lógica de negocio, solo define rutas y las conecta con los controllers.
-router.post('/', createService);
-router.put('/:sid', updateService);
+router.get('/:sid', getServiceById);
+router.post('/', validateBody(createServiceSchema), createService);
+router.put('/:sid', validateBody(updateServiceSchema), updateService);
 router.delete('/:sid', deleteService);
 
 export default router;

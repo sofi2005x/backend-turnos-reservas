@@ -1,7 +1,12 @@
 import { ServiceModel } from '../models/service.model.js';
+
 export const servicesDao = {
-  async getAll() {
-    return await ServiceModel.find();
+  async getAll(filter, sortOption, skip, limit) {
+    return await ServiceModel.find(filter).sort(sortOption).skip(skip).limit(limit);
+  },
+
+  async countAll(filter) {
+    return await ServiceModel.countDocuments(filter);
   },
 
   async getById(id) {
