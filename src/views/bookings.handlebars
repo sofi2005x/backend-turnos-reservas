@@ -1,32 +1,45 @@
-<h1>📅 Listado de Reservas</h1>
+<div style="margin-bottom: 1.5rem;">
+  <h1>Reservas</h1>
+  <p style="color: #64748b; font-size: 0.875rem; margin-top: 0.2rem;">Gestión de turnos agendados y servicios vinculados</p>
+</div>
 
 <div class="grid">
   {{#if bookings.length}}
     {{#each bookings}}
       <div class="card">
         <div>
-          <h2>👤 {{this.clientName}}</h2>
-          <p><strong>📧 Email:</strong> {{this.clientEmail}}</p>
-          <p><strong>🗓️ Fecha y Hora:</strong> {{this.date}} a las {{this.time}} hs</p>
-          <p><strong>Estado:</strong>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+            <h2>{{this.clientName}}</h2>
             <span class="badge {{#if (eq this.status 'confirmed')}}badge-success{{else if (eq this.status 'pending')}}badge-warning{{else}}badge-danger{{/if}}">
               {{this.status}}
             </span>
-          </p>
-          <p><strong>Servicios contratados:</strong>
-            {{#if this.services.length}}
-              {{#each this.services}}
-                {{this.service.name}} (x{{this.quantity}}){{#unless @last}}, {{/unless}}
-              {{/each}}
-            {{else}}
-              Ninguno
-            {{/if}}
-          </p>
+          </div>
+          
+          <p><strong>Email:</strong> {{this.clientEmail}}</p>
+          <p><strong>Fecha y Hora:</strong> {{this.date}} &mdash; {{this.time}} hs</p>
+          
+          <div style="margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid #1e293b;">
+            <p style="font-size: 0.8rem; color: #64748b; text-transform: uppercase; font-weight: 600; margin-bottom: 0.3rem;">Servicios incluidos:</p>
+            <p style="color: #cbd5e1;">
+              {{#if this.services.length}}
+                {{#each this.services}}
+                  {{this.service.name}} <span style="color: #818cf8;">(x{{this.quantity}})</span>{{#unless @last}}, {{/unless}}
+                {{/each}}
+              {{else}}
+                <span style="color: #64748b; font-style: italic;">Sin servicios asignados</span>
+              {{/if}}
+            </p>
+          </div>
         </div>
-        <a href="/views/bookings/{{this._id}}" class="detail-btn">🔍 Ver Detalle</a>
+
+        <div style="margin-top: 1.25rem;">
+          <a href="/views/bookings/{{this._id}}" class="btn-primary" style="width: 100%;">Ver Detalle</a>
+        </div>
       </div>
     {{/each}}
   {{else}}
-    <p>No hay reservas registradas en el sistema.</p>
+    <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; background: #0f172a; border-radius: 8px; border: 1px dashed #1e293b;">
+      <p style="font-size: 0.95rem; color: #64748b;">No hay reservas registradas en el sistema.</p>
+    </div>
   {{/if}}
 </div>

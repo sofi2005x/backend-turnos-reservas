@@ -1,34 +1,46 @@
-<h1>📋 Detalle de la Reserva</h1>
+<div style="margin-bottom: 1.5rem;">
+  <h1>Detalle de Reserva</h1>
+  <p style="color: #64748b; font-size: 0.875rem; margin-top: 0.2rem;">Información detallada del cliente y desglose de servicios</p>
+</div>
 
 {{#if booking}}
-  <div class="card" style="max-width: 600px; margin: 0 auto;">
-    <h2>👤 {{booking.clientName}}</h2>
-    <p><strong>📧 Email:</strong> {{booking.clientEmail}}</p>
-    <p><strong>🗓️ Fecha y Hora:</strong> {{booking.date}} a las {{booking.time}} hs</p>
-    <p><strong>Estado:</strong>
+  <div class="card" style="max-width: 650px;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+      <h2>{{booking.clientName}}</h2>
       <span class="badge {{#if (eq booking.status 'confirmed')}}badge-success{{else if (eq booking.status 'pending')}}badge-warning{{else}}badge-danger{{/if}}">
         {{booking.status}}
       </span>
-    </p>
-    
-    <div style="margin-top: 1rem; border-top: 1px solid #e2e8f0; padding-top: 1rem;">
-      <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: #1e293b;">Servicios Contratados:</h3>
-      <ul style="padding-left: 1.2rem; color: #475569;">
-        {{#each booking.services}}
-          <li style="margin-bottom: 0.3rem;">
-            <strong>{{this.service.name}}</strong> (Cantidad: {{this.quantity}}) - ${{this.service.price}} c/u
-          </li>
-        {{else}}
-          <li>Sin servicios agregados</li>
-        {{/each}}
-      </ul>
     </div>
 
-    <div style="margin-top: 1.5rem;">
-      <a href="/views/bookings" class="detail-btn" style="background: #64748b;">⬅️ Volver a Reservas</a>
+    <p><strong>Email:</strong> {{booking.clientEmail}}</p>
+    <p><strong>Fecha y Hora:</strong> {{booking.date}} &mdash; {{booking.time}} hs</p>
+    <p><strong>ID de Reserva:</strong> <code style="font-size: 0.8rem; background: #090d16; padding: 0.2rem 0.4rem; border-radius: 4px; color: #818cf8;">{{booking._id}}</code></p>
+    
+    <div style="margin-top: 1.25rem; border-top: 1px solid #1e293b; padding-top: 1.25rem;">
+      <h3 style="font-size: 0.95rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; color: #cbd5e1; margin-bottom: 0.75rem;">Servicios Contratados</h3>
+      
+      <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+        {{#each booking.services}}
+          <div style="display: flex; justify-content: space-between; align-items: center; background: #090d16; padding: 0.75rem 1rem; border-radius: 6px; border: 1px solid #1e293b;">
+            <div>
+              <span style="font-weight: 600; color: #f8fafc;">{{this.service.name}}</span>
+              <span style="font-size: 0.8rem; color: #94a3b8; margin-left: 0.5rem;">x{{this.quantity}} unid.</span>
+            </div>
+            <span style="font-weight: 600; color: #38bdf8;">${{this.service.price}}</span>
+          </div>
+        {{else}}
+          <p style="color: #64748b; font-style: italic;">Sin servicios agregados a esta reserva.</p>
+        {{/each}}
+      </div>
+    </div>
+
+    <div style="margin-top: 1.75rem;">
+      <a href="/views/bookings" class="btn-secondary">Volver al listado</a>
     </div>
   </div>
 {{else}}
-  <p>No se encontró la reserva solicitada.</p>
-  <a href="/views/bookings" class="detail-btn">⬅️ Volver a Reservas</a>
+  <div class="card" style="max-width: 500px; text-align: center; padding: 2rem;">
+    <p style="color: #fb7185; margin-bottom: 1rem;">No se encontró la reserva solicitada.</p>
+    <a href="/views/bookings" class="btn-secondary">Volver al listado</a>
+  </div>
 {{/if}}

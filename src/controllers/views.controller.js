@@ -1,13 +1,50 @@
 import { servicesService } from '../services/services.service.js';
 import { bookingsService } from '../services/bookings.service.js';
 
-// GET /views/services -> renderiza el listado de servicios
+// GET /views/services -> renderiza el listado de servicios con filtros y paginación
 export const renderServices = async (req, res) => {
   try {
-    const result = await servicesService.getServices({});
+    const { category, available, page, limit, sortBy, order } = req.query;
+    const result = await servicesService.getServices({
+      category,
+      available,
+      page,
+      limit: limit || 6,
+      sortBy,
+      order,
+    });
     const servicesList = result.services || [];
     const services = servicesList.map(s => (s.toObject ? s.toObject() : s));
-    res.render('services', { services });
+
+    const currentPage = result.pagination.page;
+    const prevPage = result.pagination.hasPrevPage ? currentPage - 1 : null;
+    const nextPage = result.pagination.hasNextPage ? currentPage + 1 : null;
+
+    // Construir URLs de paginación manteniendo los filtros activos
+    const buildUrl = (pageNum) => {
+      const params = new URLSearchParams();
+      if (category) params.set('category', category);
+      if (available !== undefined && available !== '') params.set('available', available);
+      if (sortBy) params.set('sortBy', sortBy);
+      if (order) params.set('order', order);
+      params.set('page', pageNum);
+      return `/views/services?${params.toString()}`;
+    };
+
+    res.render('services', {
+      services,
+      pagination: {
+        ...result.pagination,
+        prevLink: prevPage ? buildUrl(prevPage) : null,
+        nextLink: nextPage ? buildUrl(nextPage) : null,
+      },
+      filters: {
+        category: category || '',
+        available: available || '',
+        sortBy: sortBy || 'name',
+        order: order || 'asc',
+      },
+    });
   } catch (error) {
     console.error("Error al renderizar servicios:", error);
     res.status(500).send('Error al cargar los servicios');

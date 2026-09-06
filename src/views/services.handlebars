@@ -1,26 +1,148 @@
-<h1>💈 Catálogo de Servicios</h1>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+  <div>
+    <h1>Servicios</h1>
+    <p style="color: #64748b; font-size: 0.875rem; margin-top: 0.2rem;">Administración y consulta del catálogo de servicios</p>
+  </div>
+  <button id="toggle-form-btn" class="btn-success">
+    Nuevo Servicio
+  </button>
+</div>
 
+<!-- Panel para Crear Servicio (con Zod & Socket.io) -->
+<div id="create-service-panel" class="card" style="display: none; margin-bottom: 2rem; border-color: #059669;">
+  <h2 style="margin-bottom: 1rem; color: #f8fafc;">Nuevo Servicio</h2>
+  
+  <form id="create-service-form" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.2rem;">
+    <div>
+      <label>Nombre:</label>
+      <input type="text" name="name" placeholder="Ej: Tratamiento Facial" required class="form-input" />
+    </div>
+    <div>
+      <label>Categoría:</label>
+      <select name="category" required class="form-input">
+        <option value="barberia">Barbería</option>
+        <option value="peluqueria">Peluquería</option>
+        <option value="estetica">Estética</option>
+        <option value="spa">Spa</option>
+      </select>
+    </div>
+    <div>
+      <label>Duración (minutos):</label>
+      <input type="number" name="duration" placeholder="Ej: 45" required min="1" class="form-input" />
+    </div>
+    <div>
+      <label>Precio:</label>
+      <input type="number" name="price" placeholder="Ej: 2000" required min="0" class="form-input" />
+    </div>
+    <div style="grid-column: 1 / -1;">
+      <label>Descripción:</label>
+      <input type="text" name="description" placeholder="Descripción detallada del servicio" required class="form-input" />
+    </div>
+    <div>
+      <label style="display: flex; align-items: center; gap: 0.5rem; color: #cbd5e1; cursor: pointer; margin-top: 0.5rem;">
+        <input type="checkbox" name="available" checked style="accent-color: #6366f1;" /> Disponible para reservas
+      </label>
+    </div>
+    <div style="display: flex; align-items: flex-end; gap: 0.75rem;">
+      <button type="submit" class="btn-success">Guardar Servicio</button>
+      <button type="button" id="cancel-form-btn" class="btn-secondary">Cancelar</button>
+    </div>
+  </form>
+  <div id="form-error-msg" style="color: #fb7185; font-size: 0.85rem; margin-top: 1rem; display: none; padding: 0.75rem; background: rgba(244, 63, 94, 0.1); border-radius: 6px; border: 1px solid rgba(244, 63, 94, 0.2);"></div>
+</div>
+
+<!-- Filtros y Ordenamiento -->
+<div class="card" style="margin-bottom: 1.5rem;">
+  <form method="GET" action="/views/services" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
+    <div style="flex: 1; min-width: 150px;">
+      <label>Categoría:</label>
+      <select name="category" class="form-input">
+        <option value="" {{#if (eq filters.category '')}}selected{{/if}}>Todas</option>
+        <option value="barberia" {{#if (eq filters.category 'barberia')}}selected{{/if}}>Barbería</option>
+        <option value="peluqueria" {{#if (eq filters.category 'peluqueria')}}selected{{/if}}>Peluquería</option>
+        <option value="estetica" {{#if (eq filters.category 'estetica')}}selected{{/if}}>Estética</option>
+        <option value="spa" {{#if (eq filters.category 'spa')}}selected{{/if}}>Spa</option>
+      </select>
+    </div>
+
+    <div style="flex: 1; min-width: 150px;">
+      <label>Disponibilidad:</label>
+      <select name="available" class="form-input">
+        <option value="" {{#if (eq filters.available '')}}selected{{/if}}>Todos</option>
+        <option value="true" {{#if (eq filters.available 'true')}}selected{{/if}}>Disponibles</option>
+        <option value="false" {{#if (eq filters.available 'false')}}selected{{/if}}>No disponibles</option>
+      </select>
+    </div>
+
+    <div style="flex: 1; min-width: 150px;">
+      <label>Ordenar por:</label>
+      <select name="sortBy" class="form-input">
+        <option value="name" {{#if (eq filters.sortBy 'name')}}selected{{/if}}>Nombre</option>
+        <option value="price" {{#if (eq filters.sortBy 'price')}}selected{{/if}}>Precio</option>
+        <option value="duration" {{#if (eq filters.sortBy 'duration')}}selected{{/if}}>Duración</option>
+      </select>
+    </div>
+
+    <div style="flex: 1; min-width: 120px;">
+      <label>Orden:</label>
+      <select name="order" class="form-input">
+        <option value="asc" {{#if (eq filters.order 'asc')}}selected{{/if}}>Ascendente</option>
+        <option value="desc" {{#if (eq filters.order 'desc')}}selected{{/if}}>Descendente</option>
+      </select>
+    </div>
+
+    <div style="display: flex; gap: 0.5rem;">
+      <button type="submit" class="btn-primary">Filtrar</button>
+      <a href="/views/services" class="btn-secondary">Limpiar</a>
+    </div>
+  </form>
+</div>
+
+<!-- Listado de Servicios -->
 <div id="services-list" class="grid">
   {{#if services.length}}
     {{#each services}}
       <div class="card {{#unless this.available}}unavailable{{/unless}}">
         <div>
-          <h2>{{this.name}}</h2>
-          <p>{{this.description}}</p>
-          <p><strong>Categoría:</strong> <span class="badge badge-warning">{{this.category}}</span></p>
-          <p><strong>Duración:</strong> ⏱️ {{this.duration}} min</p>
-          <p><strong>Estado:</strong> 
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.5rem;">
+            <h2>{{this.name}}</h2>
             {{#if this.available}}
               <span class="badge badge-success">Disponible</span>
             {{else}}
-              <span class="badge badge-danger">No disponible</span>
+              <span class="badge badge-danger">Agotado</span>
             {{/if}}
-          </p>
+          </div>
+          <p style="margin-bottom: 0.8rem;">{{this.description}}</p>
+          <p><strong>Categoría:</strong> <span class="badge badge-default">{{this.category}}</span></p>
+          <p><strong>Duración:</strong> {{this.duration}} min</p>
         </div>
         <p class="price-tag">${{this.price}}</p>
       </div>
     {{/each}}
   {{else}}
-    <p>No hay servicios cargados actualmente.</p>
+    <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; background: #0f172a; border-radius: 8px; border: 1px dashed #1e293b;">
+      <p style="font-size: 0.95rem; color: #64748b;">No se encontraron servicios que coincidan con los criterios de búsqueda.</p>
+    </div>
   {{/if}}
 </div>
+
+<!-- Paginación -->
+{{#if pagination.totalPages}}
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; padding: 1rem 1.25rem; background: #0f172a; border-radius: 8px; border: 1px solid #1e293b; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      {{#if pagination.prevLink}}
+        <a href="{{pagination.prevLink}}" class="btn-secondary">Anterior</a>
+      {{/if}}
+    </div>
+
+    <div style="font-size: 0.875rem; color: #94a3b8;">
+      Página <strong style="color: #f8fafc;">{{pagination.page}}</strong> de <strong style="color: #f8fafc;">{{pagination.totalPages}}</strong> ({{pagination.totalResults}} resultados)
+    </div>
+
+    <div>
+      {{#if pagination.nextLink}}
+        <a href="{{pagination.nextLink}}" class="btn-secondary">Siguiente</a>
+      {{/if}}
+    </div>
+  </div>
+{{/if}}
