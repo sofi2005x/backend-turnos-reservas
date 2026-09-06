@@ -4,7 +4,9 @@ import { bookingsService } from '../services/bookings.service.js';
 // GET /views/services -> renderiza el listado de servicios
 export const renderServices = async (req, res) => {
   try {
-    const services = await servicesService.getServices();
+    const result = await servicesService.getServices({});
+    const servicesList = result.services || [];
+    const services = servicesList.map(s => (s.toObject ? s.toObject() : s));
     res.render('services', { services });
   } catch (error) {
     console.error("Error al renderizar servicios:", error);
@@ -15,9 +17,11 @@ export const renderServices = async (req, res) => {
 // GET /views/bookings -> renderiza el listado de reservas (disponibilidad)
 export const renderBookings = async (req, res) => {
   try {
-    const bookings = await bookingsService.getBookings();
+    const bookingsData = await bookingsService.getBookings();
+    const bookings = (bookingsData || []).map(b => (b.toObject ? b.toObject() : b));
     res.render('bookings', { bookings });
   } catch (error) {
+    console.error("Error al renderizar reservas:", error);
     res.status(500).send('Error al cargar las reservas');
   }
 };
@@ -26,14 +30,16 @@ export const renderBookings = async (req, res) => {
 export const renderBookingDetail = async (req, res) => {
   try {
     const { bid } = req.params;
-    const booking = await bookingsService.getBookingById(bid);
+    const bookingDoc = await bookingsService.getBookingById(bid);
 
-    if (!booking) {
+    if (!bookingDoc) {
       return res.status(404).send('Reserva no encontrada');
     }
 
+    const booking = bookingDoc.toObject ? bookingDoc.toObject() : bookingDoc;
     res.render('booking-detail', { booking });
   } catch (error) {
+    console.error("Error al renderizar detalle de reserva:", error);
     res.status(500).send('Error al cargar la reserva');
   }
 };

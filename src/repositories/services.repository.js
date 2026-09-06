@@ -1,7 +1,7 @@
 import { servicesDao } from '../dao/services.dao.js';
 
 export const servicesRepository = {
-  async getAll({ category, available, page, limit, sortBy, order }) {
+  async getAll({ category, available, page, limit, sortBy, order } = {}) {
     // Construcción dinámica del filtro: solo se agregan las claves que el cliente mandó
     const filter = {};
     if (category) filter.category = category;

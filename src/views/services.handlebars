@@ -1,18 +1,26 @@
-<h1>Servicios disponibles</h1>
+<h1>💈 Catálogo de Servicios</h1>
 
-<div id="services-list">
+<div id="services-list" class="grid">
   {{#if services.length}}
     {{#each services}}
       <div class="card {{#unless this.available}}unavailable{{/unless}}">
-        <h2>{{this.name}}</h2>
-        <p>{{this.description}}</p>
-        <p>Duración: {{this.duration}} minutos</p>
-        <p>Precio: ${{this.price}}</p>
-        <p>Categoría: {{this.category}}</p>
-        <p>Disponible: {{#if this.available}}Sí{{else}}No{{/if}}</p>
+        <div>
+          <h2>{{this.name}}</h2>
+          <p>{{this.description}}</p>
+          <p><strong>Categoría:</strong> <span class="badge badge-warning">{{this.category}}</span></p>
+          <p><strong>Duración:</strong> ⏱️ {{this.duration}} min</p>
+          <p><strong>Estado:</strong> 
+            {{#if this.available}}
+              <span class="badge badge-success">Disponible</span>
+            {{else}}
+              <span class="badge badge-danger">No disponible</span>
+            {{/if}}
+          </p>
+        </div>
+        <p class="price-tag">${{this.price}}</p>
       </div>
     {{/each}}
   {{else}}
-    <p>No hay servicios cargados.</p>
+    <p>No hay servicios cargados actualmente.</p>
   {{/if}}
 </div>

@@ -19,19 +19,43 @@ const seedDatabase = async () => {
     // Insertar servicios
     const services = await ServiceModel.insertMany([
       {
-        name: 'Corte de cabello',
-        description: 'Corte profesional',
+        name: 'Corte de cabello masculino',
+        description: 'Corte clásico o moderno con tijera y máquina, incluye lavado.',
         duration: 30,
-        price: 500,
+        price: 1200,
         category: 'barberia',
         available: true,
       },
       {
-        name: 'Afeitado',
-        description: 'Afeitado clásico',
-        duration: 20,
-        price: 300,
+        name: 'Perfilado y corte de barba',
+        description: 'Arreglo completo de barba con toalla caliente y aceites esenciales.',
+        duration: 25,
+        price: 800,
         category: 'barberia',
+        available: true,
+      },
+      {
+        name: 'Coloración y Mechas',
+        description: 'Tintura completa o reflejos con productos de alta nutrición capilar.',
+        duration: 90,
+        price: 3500,
+        category: 'peluqueria',
+        available: true,
+      },
+      {
+        name: 'Manicura Spa Completa',
+        description: 'Exfoliación, hidratación profunda y esmaltado semipermanente.',
+        duration: 45,
+        price: 1500,
+        category: 'estetica',
+        available: true,
+      },
+      {
+        name: 'Masaje Descontracturante',
+        description: 'Sesión de relajación y alivio muscular en espalda y cuello.',
+        duration: 50,
+        price: 2500,
+        category: 'spa',
         available: true,
       },
     ]);
@@ -42,12 +66,34 @@ const seedDatabase = async () => {
     const bookings = await BookingModel.insertMany([
       {
         clientName: 'Juan Pérez',
-        clientEmail: 'juan@example.com',
-        date: '2026-08-15',
+        clientEmail: 'juan.perez@example.com',
+        date: '2026-09-10',
         time: '10:00',
-        status: 'pending',
+        status: 'confirmed',
         services: [
           { service: services[0]._id, quantity: 1 },
+          { service: services[1]._id, quantity: 1 },
+        ],
+      },
+      {
+        clientName: 'María Rodríguez',
+        clientEmail: 'maria.rodriguez@example.com',
+        date: '2026-09-11',
+        time: '14:30',
+        status: 'pending',
+        services: [
+          { service: services[2]._id, quantity: 1 },
+          { service: services[3]._id, quantity: 1 },
+        ],
+      },
+      {
+        clientName: 'Carlos Gómez',
+        clientEmail: 'carlos.gomez@example.com',
+        date: '2026-09-12',
+        time: '16:00',
+        status: 'confirmed',
+        services: [
+          { service: services[4]._id, quantity: 1 },
         ],
       },
     ]);
@@ -57,8 +103,20 @@ const seedDatabase = async () => {
     // Insertar mensajes
     const messages = await MessageModel.insertMany([
       {
-        user: 'admin',
-        message: 'Sistema inicializado',
+        user: 'Juan Pérez',
+        message: 'Excelente atención, el corte quedó genial.',
+      },
+      {
+        user: 'María Rodríguez',
+        message: '¿Tienen disponibilidad para el próximo sábado por la mañana?',
+      },
+      {
+        user: 'Carlos Gómez',
+        message: 'Muy buen ambiente y puntualidad.',
+      },
+      {
+        user: 'Admin',
+        message: '¡Bienvenidos al sistema de gestión de turnos!',
       },
     ]);
 

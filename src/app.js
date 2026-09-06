@@ -20,6 +20,13 @@ app.use(express.static(path.join(__dirname, '..', 'public'))); //Esto es lo que 
 app.engine('handlebars', engine({
   defaultLayout: 'main',
   layoutsDir: path.join(__dirname, 'views', 'layouts'),
+  helpers: {
+    eq: (a, b) => a === b,
+  },
+  runtimeOptions: {
+    allowProtoPropertiesByDefault: true,
+    allowProtoMethodsByDefault: true,
+  },
 }));
 app.set('view engine', 'handlebars');
 app.set('views', path.join(__dirname, 'views'));

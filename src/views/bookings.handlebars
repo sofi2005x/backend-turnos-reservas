@@ -1,19 +1,32 @@
-<h1>Reservas</h1>
+<h1>📅 Listado de Reservas</h1>
 
-{{#if bookings.length}}
-  {{#each bookings}}
-    <div class="card">
-      <h2>{{this.clientName}}</h2>
-      <p>Email: {{this.clientEmail}}</p>
-      <p>Fecha: {{this.date}} — Hora: {{this.time}}</p>
-      <p>Estado: {{this.status}}</p>
-      <p>Servicios:
-        {{#each this.services}}
-          {{this.service.name}} (x{{this.quantity}}){{#unless @last}}, {{/unless}}
-        {{/each}}
-      </p>
-    </div>
-  {{/each}}
-{{else}}
-  <p>No hay reservas cargadas.</p>
-{{/if}}
+<div class="grid">
+  {{#if bookings.length}}
+    {{#each bookings}}
+      <div class="card">
+        <div>
+          <h2>👤 {{this.clientName}}</h2>
+          <p><strong>📧 Email:</strong> {{this.clientEmail}}</p>
+          <p><strong>🗓️ Fecha y Hora:</strong> {{this.date}} a las {{this.time}} hs</p>
+          <p><strong>Estado:</strong>
+            <span class="badge {{#if (eq this.status 'confirmed')}}badge-success{{else if (eq this.status 'pending')}}badge-warning{{else}}badge-danger{{/if}}">
+              {{this.status}}
+            </span>
+          </p>
+          <p><strong>Servicios contratados:</strong>
+            {{#if this.services.length}}
+              {{#each this.services}}
+                {{this.service.name}} (x{{this.quantity}}){{#unless @last}}, {{/unless}}
+              {{/each}}
+            {{else}}
+              Ninguno
+            {{/if}}
+          </p>
+        </div>
+        <a href="/views/bookings/{{this._id}}" class="detail-btn">🔍 Ver Detalle</a>
+      </div>
+    {{/each}}
+  {{else}}
+    <p>No hay reservas registradas en el sistema.</p>
+  {{/if}}
+</div>

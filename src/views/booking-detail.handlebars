@@ -1,20 +1,34 @@
-<h1>Detalle de la reserva</h1>
+<h1>📋 Detalle de la Reserva</h1>
 
 {{#if booking}}
-  <div class="card">
-    <h2>{{booking.clientName}}</h2>
-    <p>Email: {{booking.clientEmail}}</p>
-    <p>Fecha: {{booking.date}} — Hora: {{booking.time}}</p>
-    <p>Estado: {{booking.status}}</p>
-    <p>Servicios:</p>
-    <ul>
-      {{#each booking.services}}
-        <li>{{this.service.name}} (x{{this.quantity}})</li>
-      {{else}}
-        <li>Sin servicios agregados</li>
-      {{/each}}
-    </ul>
+  <div class="card" style="max-width: 600px; margin: 0 auto;">
+    <h2>👤 {{booking.clientName}}</h2>
+    <p><strong>📧 Email:</strong> {{booking.clientEmail}}</p>
+    <p><strong>🗓️ Fecha y Hora:</strong> {{booking.date}} a las {{booking.time}} hs</p>
+    <p><strong>Estado:</strong>
+      <span class="badge {{#if (eq booking.status 'confirmed')}}badge-success{{else if (eq booking.status 'pending')}}badge-warning{{else}}badge-danger{{/if}}">
+        {{booking.status}}
+      </span>
+    </p>
+    
+    <div style="margin-top: 1rem; border-top: 1px solid #e2e8f0; padding-top: 1rem;">
+      <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: #1e293b;">Servicios Contratados:</h3>
+      <ul style="padding-left: 1.2rem; color: #475569;">
+        {{#each booking.services}}
+          <li style="margin-bottom: 0.3rem;">
+            <strong>{{this.service.name}}</strong> (Cantidad: {{this.quantity}}) - ${{this.service.price}} c/u
+          </li>
+        {{else}}
+          <li>Sin servicios agregados</li>
+        {{/each}}
+      </ul>
+    </div>
+
+    <div style="margin-top: 1.5rem;">
+      <a href="/views/bookings" class="detail-btn" style="background: #64748b;">⬅️ Volver a Reservas</a>
+    </div>
   </div>
 {{else}}
-  <p>No se encontró la reserva.</p>
+  <p>No se encontró la reserva solicitada.</p>
+  <a href="/views/bookings" class="detail-btn">⬅️ Volver a Reservas</a>
 {{/if}}

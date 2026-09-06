@@ -6,7 +6,17 @@
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
-  {{{body}}}
+  <header class="navbar">
+    <div class="nav-brand">✨ Sistema de Turnos & Reservas</div>
+    <nav class="nav-links">
+      <a href="/views/services" class="nav-link">💇 Servicios</a>
+      <a href="/views/bookings" class="nav-link">📅 Reservas</a>
+    </nav>
+  </header>
+
+  <main class="main-container">
+    {{{body}}}
+  </main>
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/socket.js"></script>

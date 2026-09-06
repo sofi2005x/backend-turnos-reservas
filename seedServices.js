@@ -32,8 +32,12 @@ const randomName = () => {
 
 // Generar email aleatorio
 const randomEmail = (nombre) => {
-  const name = nombre.toLowerCase().replace(' ', '.');
-  return `${name}@email.com`;
+  const cleanName = nombre
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Quita tildes
+    .replace(/\s+/g, '.');
+  return `${cleanName}@email.com`;
 };
 
 // Generar fecha aleatoria (próximos 30 días)
