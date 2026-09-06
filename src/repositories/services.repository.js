@@ -1,11 +1,20 @@
 import { servicesDao } from '../dao/services.dao.js';
 
 export const servicesRepository = {
-  async getAll({ category, available, page, limit, sortBy, order } = {}) {
+  async getAll({ name, category, available, page, limit, sortBy, order } = {}) {
     // Construcción dinámica del filtro: solo se agregan las claves que el cliente mandó
     const filter = {};
-    if (category) filter.category = category;
-    if (available !== undefined) filter.available = available === 'true';
+    if (name && name.trim() !== '') {
+      filter.name = new RegExp(name.trim(), 'i');
+    }
+    if (category && category.trim() !== '') {
+      filter.category = new RegExp(`^${category.trim()}$`, 'i');
+    }
+    if (available === 'true' || available === true) {
+      filter.available = true;
+    } else if (available === 'false' || available === false) {
+      filter.available = false;
+    }
 
     // Ordenamiento: por defecto orden ascendente por nombre si no se pide nada puntual
     const sortField = sortBy || 'name';

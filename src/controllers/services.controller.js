@@ -3,8 +3,9 @@ import { servicesService } from '../services/services.service.js';
 // GET /api/services -> lista servicios con filtros, paginación y ordenamiento
 export const getServices = async (req, res) => {
   try {
-    const { category, available, page, limit, sortBy, order } = req.query;
+    const { name, category, available, page, limit, sortBy, order } = req.query;
     const { services, pagination } = await servicesService.getServices({
+      name,
       category,
       available,
       page,

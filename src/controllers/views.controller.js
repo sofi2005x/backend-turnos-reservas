@@ -4,8 +4,9 @@ import { bookingsService } from '../services/bookings.service.js';
 // GET /views/services -> renderiza el listado de servicios con filtros y paginación
 export const renderServices = async (req, res) => {
   try {
-    const { category, available, page, limit, sortBy, order } = req.query;
+    const { name, category, available, page, limit, sortBy, order } = req.query;
     const result = await servicesService.getServices({
+      name,
       category,
       available,
       page,
@@ -23,6 +24,7 @@ export const renderServices = async (req, res) => {
     // Construir URLs de paginación manteniendo los filtros activos
     const buildUrl = (pageNum) => {
       const params = new URLSearchParams();
+      if (name) params.set('name', name);
       if (category) params.set('category', category);
       if (available !== undefined && available !== '') params.set('available', available);
       if (sortBy) params.set('sortBy', sortBy);
@@ -39,6 +41,7 @@ export const renderServices = async (req, res) => {
         nextLink: nextPage ? buildUrl(nextPage) : null,
       },
       filters: {
+        name: name || '',
         category: category || '',
         available: available || '',
         sortBy: sortBy || 'name',
