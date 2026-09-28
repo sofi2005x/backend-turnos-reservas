@@ -11,3 +11,13 @@ export const createServiceSchema = z.object({
 
 // partial() vuelve todos los campos opcionales, útil para un PUT parcial
 export const updateServiceSchema = createServiceSchema.partial();
+
+export const getServicesQuerySchema = z.object({
+  name: z.string().trim().max(100).optional(),
+  category: z.string().trim().max(100).optional(),
+  available: z.enum(['true', 'false']).optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(10),
+  sortBy: z.enum(['name', 'price', 'duration', 'category', 'createdAt']).default('name'),
+  order: z.enum(['asc', 'desc']).default('asc'),
+});
