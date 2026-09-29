@@ -21,9 +21,11 @@ export const {
 
 // Exportación desestructurada de métodos de Bookings
 export const {
-  createBooking,
+  getBookings,
   getBookingById,
+  createBooking,
   addServiceToBooking,
+  deleteBooking,
 } = bookingsController;
 
 // Exportación opcional de los controladores completos

@@ -14,10 +14,31 @@ export const getServices = async (req, res) => {
       order,
     });
 
+    const buildLink = (targetPage) => {
+      const params = new URLSearchParams();
+      if (name) params.set('name', name);
+      if (category) params.set('category', category);
+      if (available !== undefined) params.set('available', available);
+      if (sortBy) params.set('sortBy', sortBy);
+      if (order) params.set('order', order);
+      params.set('limit', pagination.limit);
+      params.set('page', targetPage);
+      return `/api/services?${params.toString()}`;
+    };
+
     res.status(200).json({
       status: 'success',
       payload: services,
-      ...pagination,
+      totalResults: pagination.totalResults,
+      totalPages: pagination.totalPages,
+      page: pagination.page,
+      limit: pagination.limit,
+      hasPrevPage: pagination.hasPrevPage,
+      hasNextPage: pagination.hasNextPage,
+      prevPage: pagination.hasPrevPage ? pagination.page - 1 : null,
+      nextPage: pagination.hasNextPage ? pagination.page + 1 : null,
+      prevLink: pagination.hasPrevPage ? buildLink(pagination.page - 1) : null,
+      nextLink: pagination.hasNextPage ? buildLink(pagination.page + 1) : null,
     });
   } catch (error) {
     res.status(500).json({ status: 'error', message: 'Error al obtener los servicios' });
@@ -44,7 +65,8 @@ export const getServiceById = async (req, res) => {
 export const createService = async (req, res) => {
   try {
     const newService = await servicesService.createService(req.body);
-    req.app.get('io').emit('serviceCreated', newService);
+    const io = req.app.get('io');
+    if (io) io.emit('serviceCreated', newService);
     res.status(201).json({ status: 'success', payload: newService });
   } catch (error) {
     res.status(400).json({ status: 'error', message: error.message });
@@ -61,6 +83,9 @@ export const updateService = async (req, res) => {
       return res.status(404).json({ status: 'error', message: `No se encontró un servicio con id ${sid}` });
     }
 
+    const io = req.app.get('io');
+    if (io) io.emit('serviceUpdated', updated);
+
     res.status(200).json({ status: 'success', payload: updated });
   } catch (error) {
     res.status(500).json({ status: 'error', message: 'Error al actualizar el servicio' });
@@ -76,6 +101,9 @@ export const deleteService = async (req, res) => {
     if (!deleted) {
       return res.status(404).json({ status: 'error', message: `No se encontró un servicio con id ${sid}` });
     }
+
+    const io = req.app.get('io');
+    if (io) io.emit('serviceDeleted', { id: sid });
 
     res.status(200).json({ status: 'success', payload: deleted });
   } catch (error) {

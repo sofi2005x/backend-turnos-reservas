@@ -44,10 +44,11 @@ export const bookingsService = {
     // CAMBIO 1: No convertir a número, trabajar con ObjectId
     // const numericServiceId = Number(serviceId);  // BORRAR ESTA LÍNEA
 
-    // CAMBIO 2: Comparar ObjectIds correctamente
-    const existingService = booking.services.find((item) => 
-      item.service.toString() === serviceId
-    );
+    // Comparar ObjectIds correctamente (soporta tanto objeto poblado como ObjectId directo)
+    const existingService = booking.services.find((item) => {
+      const currentServiceId = item.service?._id ? item.service._id.toString() : item.service?.toString();
+      return currentServiceId === serviceId.toString();
+    });
 
     // regla de negocio: si el servicio ya estaba, se incrementa quantity en vez de duplicar
     if (existingService) {
@@ -58,5 +59,9 @@ export const bookingsService = {
 
     // CAMBIO 3: Con Mongoose es _id, no id
     return await bookingsRepository.update(booking._id, { services: booking.services });
+  },
+
+  async deleteBooking(id) {
+    return await bookingsRepository.delete(id);
   },
 };

@@ -12,6 +12,12 @@ export const createServiceSchema = z.object({
 // partial() vuelve todos los campos opcionales, útil para un PUT parcial
 export const updateServiceSchema = createServiceSchema.partial();
 
+const objectId = z.string().regex(/^[0-9a-fA-F]{24}$/, 'debe ser un ObjectId válido de 24 caracteres hexadecimales');
+
+export const serviceIdParamSchema = z.object({
+  sid: objectId,
+});
+
 export const getServicesQuerySchema = z.object({
   name: z.string().trim().max(100).optional(),
   category: z.string().trim().max(100).optional(),

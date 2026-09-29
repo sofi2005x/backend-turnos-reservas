@@ -1,15 +1,14 @@
 # Sistema Backend de Turnos y Reservas
 
-API REST construida con **Node.js**, **Express** y **MongoDB**, que gestiona dos recursos —
-**servicios** y **reservas** — persistiendo los datos en una base de datos NoSQL mediante
-**Mongoose**.
+API REST robusta y completa construida con **Node.js**, **Express** y **MongoDB**, que gestiona el ciclo completo de dos recursos centrales: **servicios** y **reservas**, persistiendo los datos en una base de datos NoSQL mediante **Mongoose** con arquitectura en capas estricta.
 
-Este proyecto corresponde a la pre-entrega "Consultas avanzadas, validación y relaciones con
-populate" del curso de Backend Avanzado, que se suma sobre la migración a MongoDB con Mongoose
-ya realizada previamente. La arquitectura en capas se mantiene intacta: se incorporaron filtros,
-paginación y ordenamiento en servicios; validación de datos con Zod en servicios y reservas; y
-relaciones entre colecciones usando `populate`, sin modificar el comportamiento de los endpoints
-existentes.
+Este proyecto corresponde a la **Entrega Final** del curso de Backend, consolidando:
+- **Arquitectura en Capas**: `routes → controllers → services → repositories → DAO → models`.
+- **Persistencia en la Nube**: MongoDB Atlas con Mongoose y relaciones mediante `ObjectId` con `populate`.
+- **Consultas Avanzadas**: Filtros dinámicos, ordenamiento y paginación con metadatos completos (`page`, `limit`, `totalPages`, `prevLink`, `nextLink`).
+- **Validación Estricta con Zod**: Validación de payloads (`body`), parámetros de URL (`params`) y query strings (`query`) antes de alcanzar la lógica de negocio o la base de datos.
+- **Vistas Server-Side con Handlebars**: Catálogo interactivo de servicios con filtros y paginación, listado de reservas y detalle individual de reservas.
+- **Comunicación en Tiempo Real con Socket.io**: Sincronización en vivo de servicios y disponibilidad sin recargar el navegador.
 
 ## Tecnologías utilizadas
 
@@ -391,11 +390,19 @@ curl -X POST http://localhost:8080/api/bookings \
 
 | Método | Ruta                                | Descripción                                                                |
 | ------ | ------------------------------------| --------------------------------------------------------------------       |
-| POST   | `/api/bookings`                     | Crea una reserva (validada con Zod; puede iniciarse con `services` vacío)  |
+| GET    | `/api/bookings`                     | Lista todas las reservas con datos completos de servicios (`populate`)    |
 | GET    | `/api/bookings/:bid`                | Devuelve una reserva por id, con datos completos de servicios (`populate`) |
+| POST   | `/api/bookings`                     | Crea una reserva (validada con Zod; puede iniciarse con `services` vacío)  |
 | POST   | `/api/bookings/:bid/services/:sid`  | Agrega un servicio a una reserva existente (params validados con Zod)      |
+| DELETE | `/api/bookings/:bid`                | Elimina una reserva por id (params validados con Zod)                      |
 
 ### Ejemplos
+
+**Consultar todas las reservas (con datos completos de servicios mediante `populate`):**
+
+```bash
+curl http://localhost:8080/api/bookings
+```
 
 **Crear una reserva:**
 
@@ -405,12 +412,12 @@ curl -X POST http://localhost:8080/api/bookings \
   -d '{
     "clientName": "Ana Perez",
     "clientEmail": "ana@test.com",
-    "date": "2025-08-01",
+    "date": "2026-10-15",
     "time": "10:00"
   }'
 ```
 
-**Consultar una reserva (con servicios completos, gracias a `populate`):**
+**Consultar una reserva puntual (con servicios completos gracias a `populate`):**
 
 ```bash
 curl http://localhost:8080/api/bookings/6a7ab016302b05041d1dc99a
@@ -422,8 +429,13 @@ curl http://localhost:8080/api/bookings/6a7ab016302b05041d1dc99a
 curl -X POST http://localhost:8080/api/bookings/6a7ab016302b05041d1dc99a/services/6a7ab016302b05041d1dc998
 ```
 
-Si se vuelve a ejecutar la misma request, la reserva no duplica el
-servicio: incrementa `quantity` en 1.
+Si se vuelve a ejecutar la misma request, la reserva no duplica el servicio: incrementa `quantity` en 1.
+
+**Eliminar una reserva:**
+
+```bash
+curl -X DELETE http://localhost:8080/api/bookings/6a7ab016302b05041d1dc99a
+```
 
 ## Vistas con Handlebars
 

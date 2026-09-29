@@ -1,5 +1,15 @@
 import { bookingsService } from '../services/bookings.service.js';
 
+// GET /api/bookings -> devuelve todas las reservas con datos poblados de servicios
+export const getBookings = async (req, res) => {
+  try {
+    const bookings = await bookingsService.getBookings();
+    res.status(200).json({ status: 'success', payload: bookings });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: 'Error al obtener las reservas' });
+  }
+};
+
 // POST /api/bookings -> crea una reserva (puede iniciarse con services vacío)
 export const createBooking = async (req, res) => {
   try {
@@ -40,15 +50,32 @@ export const addServiceToBooking = async (req, res) => {
 
     res.status(200).json({ status: 'success', payload: updatedBooking });
   } catch (error) {
-    // el service tira Error() si el servicio (sid) no existe en services.json
+    // el service tira Error() si el servicio (sid) no existe
     res.status(404).json({ status: 'error', message: error.message });
   }
 };
 
+// DELETE /api/bookings/:bid -> elimina una reserva por id
+export const deleteBooking = async (req, res) => {
+  try {
+    const { bid } = req.params;
+    const deleted = await bookingsService.deleteBooking(bid);
 
-//exportamnos el objeto controller con todas las funciones para poder importarlas en el router
+    if (!deleted) {
+      return res.status(404).json({ status: 'error', message: `No se encontró una reserva con id ${bid}` });
+    }
+
+    res.status(200).json({ status: 'success', payload: deleted });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: 'Error al eliminar la reserva' });
+  }
+};
+
+// Exportamos el objeto controller con todas las funciones para poder importarlas en el router
 export const bookingsController = {
-  createBooking,
+  getBookings,
   getBookingById,
+  createBooking,
   addServiceToBooking,
+  deleteBooking,
 };

@@ -13,6 +13,10 @@ export const bookingsDao = {
   },
 
   async update(id, changes) {
-    return await BookingModel.findByIdAndUpdate(id, changes, { new: true }).populate('services.service');
+    return await BookingModel.findByIdAndUpdate(id, changes, { returnDocument: 'after' }).populate('services.service');
+  },
+
+  async delete(id) {
+    return await BookingModel.findByIdAndDelete(id);
   },
 };

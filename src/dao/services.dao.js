@@ -18,7 +18,7 @@ export const servicesDao = {
   },
 
   async update(id, changes) {
-    return await ServiceModel.findByIdAndUpdate(id, changes, { new: true });
+    return await ServiceModel.findByIdAndUpdate(id, changes, { returnDocument: 'after' });
   },
 
   async delete(id) {

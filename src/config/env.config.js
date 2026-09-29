@@ -7,7 +7,7 @@ import dotenv from 'dotenv';
 dotenv.config(); // Conecta el archivo .env con process.env
 
 // Lista de variables que la app NO puede arrancar sin tener
-const requiredVars = ['PORT', 'NODE_ENV'];
+const requiredVars = ['PORT', 'NODE_ENV', 'MONGO_URI'];
 
 // Busca cuáles de esas variables NO están presentes en process.env
 const missing = requiredVars.filter(key => !process.env[key]);
@@ -18,11 +18,11 @@ if (missing.length > 0) {
   process.exit(1);
 }
 
-const 
-config = {
-  port: Number(process.env.PORT), // Number() porque process.env siempre da string
-  nodeEnv: process.env.NODE_ENV,
-  mongoUri: process.env.MONGO_URI
+const config = {
+  port: Number(process.env.PORT) || 8080,
+  nodeEnv: process.env.NODE_ENV || 'development',
+  mongoUri: process.env.MONGO_URI,
+  appName: process.env.APP_NAME || 'Sistema Backend de Turnos y Reservas',
 };
 
 export default config; // Cualquier otro archivo importa este objeto ya validado

@@ -18,6 +18,11 @@ export const createBookingSchema = z.object({
     .optional(),
 });
 
+// Valida el param de rutas con :bid (GET /api/bookings/:bid, DELETE /api/bookings/:bid)
+export const bookingIdParamSchema = z.object({
+  bid: objectId,
+});
+
 // Valida los params de POST /api/bookings/:bid/services/:sid
 export const bookingServiceParamsSchema = z.object({
   bid: objectId,

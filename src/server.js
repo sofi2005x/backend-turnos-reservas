@@ -1,12 +1,10 @@
-import dotenv from 'dotenv';
-dotenv.config();
-
 import { createServer } from 'node:http';
 import { Server } from 'socket.io';
+import config from './config/env.config.js';
 import { app } from './app.js';
 import { connectDB } from './config/db.js';
 
-const PORT = process.env.PORT || 8080;
+const PORT = config.port;
 
 // Envolvemos la app de Express en un servidor HTTP nativo,
 // para poder colgar Socket.io del mismo servidor y puerto.

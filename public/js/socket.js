@@ -1,5 +1,20 @@
 const socket = io();
 
+const renderCardContent = (service) => `
+  <div>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.5rem;">
+      <h2>${service.name}</h2>
+      ${service.available 
+        ? '<span class="badge badge-success">Disponible</span>' 
+        : '<span class="badge badge-danger">Agotado</span>'}
+    </div>
+    <p style="margin-bottom: 0.8rem;">${service.description}</p>
+    <p><strong>Categoría:</strong> <span class="badge badge-default">${service.category}</span></p>
+    <p><strong>Duración:</strong> ${service.duration} min</p>
+  </div>
+  <p class="price-tag">$${service.price}</p>
+`;
+
 // Escucha el evento emitido desde services.controller.js al crear un servicio
 socket.on('serviceCreated', (newService) => {
   const container = document.getElementById('services-list');
@@ -12,22 +27,31 @@ socket.on('serviceCreated', (newService) => {
 
   const card = document.createElement('div');
   card.className = 'card' + (newService.available ? '' : ' unavailable');
+  card.dataset.id = newService._id;
   card.style.animation = 'fadeIn 0.4s ease';
-  card.innerHTML = `
-    <div>
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.5rem;">
-        <h2>${newService.name}</h2>
-        ${newService.available 
-          ? '<span class="badge badge-success">Disponible</span>' 
-          : '<span class="badge badge-danger">Agotado</span>'}
-      </div>
-      <p style="margin-bottom: 0.8rem;">${newService.description}</p>
-      <p><strong>Categoría:</strong> <span class="badge badge-default">${newService.category}</span></p>
-      <p><strong>Duración:</strong> ${newService.duration} min</p>
-    </div>
-    <p class="price-tag">$${newService.price}</p>
-  `;
+  card.innerHTML = renderCardContent(newService);
   container.prepend(card);
+});
+
+// Escucha el evento emitido al actualizar un servicio
+socket.on('serviceUpdated', (updatedService) => {
+  const card = document.querySelector(`.card[data-id="${updatedService._id}"]`);
+  if (!card) return;
+
+  card.className = 'card' + (updatedService.available ? '' : ' unavailable');
+  card.innerHTML = renderCardContent(updatedService);
+  card.style.animation = 'fadeIn 0.4s ease';
+});
+
+// Escucha el evento emitido al eliminar un servicio
+socket.on('serviceDeleted', ({ id }) => {
+  const card = document.querySelector(`.card[data-id="${id}"]`);
+  if (card) {
+    card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    card.style.opacity = '0';
+    card.style.transform = 'scale(0.95)';
+    setTimeout(() => card.remove(), 300);
+  }
 });
 
 // Lógica para desplegar el formulario y enviar petición POST con validación Zod
